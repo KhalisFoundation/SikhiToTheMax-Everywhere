@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SikhiToTheMax</title>
+    <link rel="stylesheet" href="assets/css/bundle.css" />
+  </head>
+
+  <body class="noselect">
+    <div id="frame" class="markdown-frame"></div>
+    <script>
+      const React = require('react');
+      const { Markdown } = require('./js/addons');
+      const ReactDOM = require('react-dom');
+
+      ReactDOM.render(React.createElement(Markdown), document.querySelector('#frame'));
+    </script>
+  </body>
+</html>
