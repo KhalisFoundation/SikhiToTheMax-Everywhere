@@ -342,14 +342,13 @@ function createBroadcastFiles(arg) {
 let seq = Math.floor(Math.random() * 100);
 
 const showLine = async (line, socket = io) => {
-  const overlayPrefs = store.get('obs');
   const lineWithSettings = line;
   lineWithSettings.languageSettings = {
     translation: savedSettings.translationLanguage,
     transliteration: savedSettings.transliterationLanguage,
   };
 
-  const payload = Object.assign(lineWithSettings, overlayPrefs);
+  const payload = lineWithSettings;
   if (!lineWithSettings.fromScroll) {
     socket.emit('show-line', payload);
   }
@@ -368,9 +367,12 @@ const showLine = async (line, socket = io) => {
   }
 };
 
-const updateOverlayVars = () => {
-  const overlayPrefs = store.get('obs');
-  io.emit('update-prefs', overlayPrefs);
+const updateOverlayVars = overlayPrefs => {
+  if (overlayPrefs) {
+    io.emit('update-prefs', overlayPrefs);
+  } else {
+    mainWindow.webContents.send('get-overlay-prefs');
+  }
 };
 
 const emptyOverlay = () => {
@@ -383,8 +385,7 @@ const emptyOverlay = () => {
     },
   };
   showLine(emptyLine);
-  const overlayPrefs = store.get('obs');
-  if (overlayPrefs.live) {
+  if (savedSettings.liveFeed) {
     createBroadcastFiles(emptyLine);
   }
 };
@@ -549,7 +550,9 @@ ipcMain.on('clear-apv', () => {
 
 let lastLine;
 
-ipcMain.on('update-overlay-vars', updateOverlayVars);
+ipcMain.on('save-overlay-settings', (event, overlayPrefs) => {
+  updateOverlayVars(overlayPrefs);
+});
 
 io.on('connection', socket => {
   updateOverlayVars();
@@ -677,6 +680,10 @@ ipcMain.on('save-settings', (event, setting) => {
   if (viewerWindow) {
     viewerWindow.webContents.send('save-settings', setting);
   }
+});
+
+ipcMain.on('recieve-setting', (event, setting) => {
+  mainWindow.webContents.send('recieve-setting', setting);
 });
 
 ipcMain.on('set-user-setting', (event, settingChanger) => {
