@@ -275,6 +275,7 @@ function createViewer(ipcData) {
     viewerWindow.loadURL(`file://${__dirname}/www/viewer.html`);
     viewerWindow.webContents.on('did-finish-load', () => {
       viewerWindow.show();
+      viewerWindow.openDevTools();
       const [width, height] = viewerWindow.getSize();
       mainWindow.webContents.send('external-display', {
         width,
@@ -469,6 +470,7 @@ app.on('ready', () => {
       webviewTag: true,
     },
   });
+  mainWindow.openDevTools();
   mainWindow.webContents.on('dom-ready', () => {
     if (checkForExternalDisplay()) {
       mainWindow.webContents.send('external-display', {
@@ -677,6 +679,16 @@ ipcMain.on('save-settings', (event, setting) => {
   if (viewerWindow) {
     viewerWindow.webContents.send('save-settings', setting);
   }
+});
+
+ipcMain.on('update-viewer-setting', (event, setting) => {
+  if (viewerWindow) {
+    viewerWindow.webContents.send('update-viewer-setting', setting);
+  }
+});
+
+ipcMain.on('update-global-setting', (event, setting) => {
+  mainWindow.webContents.send('update-global-setting', setting);
 });
 
 ipcMain.on('set-user-setting', (event, settingChanger) => {
